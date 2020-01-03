@@ -4,6 +4,8 @@ use lsp_server::Connection;
 use ra_lsp_server::{show_message, Result, ServerConfig};
 use ra_prof;
 
+extern crate simplelog;
+
 fn main() -> Result<()> {
     setup_logging()?;
     match Args::parse()? {
@@ -16,7 +18,15 @@ fn main() -> Result<()> {
 fn setup_logging() -> Result<()> {
     std::env::set_var("RUST_BACKTRACE", "short");
 
-    env_logger::try_init()?;
+    // env_logger::try_init()?;
+    use simplelog::*;
+    use std::fs::File;
+    CombinedLogger::init(vec![WriteLogger::new(
+        LevelFilter::Warn,
+        Config::default(),
+        File::create("/home/michal/code/rust-analyzer/debug.log").unwrap(),
+    )])
+    .unwrap();
 
     ra_prof::set_filter(match std::env::var("RA_PROFILE") {
         Ok(spec) => ra_prof::Filter::from_spec(&spec),
