@@ -213,7 +213,10 @@ impl Module {
     fn from_file(db: &impl DefDatabase, file: FileId) -> Option<Self> {
         let _p = profile("Module::from_file");
         let (krate, local_id) = db.relevant_crates(file).iter().find_map(|&crate_id| {
-            let crate_def_map = db.crate_def_map(crate_id);
+            let crate_def_map = {
+                let _p = profile("db.crate_def_map");
+                db.crate_def_map(crate_id)
+            };
             let local_id = crate_def_map.modules_for_file(file).next()?;
             Some((crate_id, local_id))
         })?;
